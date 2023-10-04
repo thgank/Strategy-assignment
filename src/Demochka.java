@@ -26,40 +26,43 @@ public class Demochka {
                         " amount - " + product.getQuantity());
             }
 
-            System.out.print("Select a payment method (1 for Card, 2 for Qiwi, 3 for Cash, 4 to exit): ");
-            int paymentMethod = sc.nextInt();
+        PaymentProcessor paymentProcessor = null;
 
-            if (paymentMethod == 1) {
-                System.out.print("Enter credit card number: ");
-                String cardNumber = sc.next();
-                System.out.print("Enter name of owner: ");
-                String cardName = sc.next();
-                cart.setPaymentStrategy(new CardPayment(cardNumber, cardName));
+        System.out.print("Select a payment method (1 for Card, 2 for Qiwi, 3 for Cash, 4 to exit): ");
+        int paymentMethod = sc.nextInt();
 
-            } else if (paymentMethod == 2) {
-                System.out.print("Enter Qiwi login: ");
-                String login = sc.next();
-                cart.setPaymentStrategy(new QiwiPayment(login));
+        if (paymentMethod == 1) {
+            System.out.print("Enter credit card number: ");
+            String cardNumber = sc.next();
+            System.out.print("Enter name of owner: ");
+            String cardName = sc.next();
+            paymentProcessor = new PaymentProcessor(new CardPayment(cardNumber, cardName));
 
-            } else if(paymentMethod == 3){
-                System.out.print("Enter how much money do you have: ");
-                double amountInWallet = sc.nextInt();
-                if (amountInWallet < cart.calcTotPrice()) {
-                    System.out.println("Insufficient funds. You have " + amountInWallet + " in your wallet, " +
-                            "but the amount to be paid is " + cart.calcTotPrice());
-                    process();
-                }
-                cart.setPaymentStrategy(new CashPayment(amountInWallet));
+        } else if (paymentMethod == 2) {
+            System.out.print("Enter Qiwi login: ");
+            String login = sc.next();
+            paymentProcessor = new PaymentProcessor(new QiwiPayment(login));
 
-            } else if (paymentMethod == 4) {
-                System.exit(0);
-
-            } else {
-                System.out.println("Invalid payment method.");
+        } else if (paymentMethod == 3) {
+            System.out.print("Enter how much money do you have: ");
+            double amountInWallet = sc.nextInt();
+            if (amountInWallet < cart.calcTotPrice()) {
+                System.out.println("Insufficient funds. You have " + amountInWallet + " in your wallet, " +
+                        "but the amount to be paid is " + cart.calcTotPrice());
+                process();
             }
+            paymentProcessor = new PaymentProcessor(new CashPayment(amountInWallet));
 
-            cart.check();
-            process();
+        } else if (paymentMethod == 4) {
+            System.exit(0);
+
+        } else {
+            System.out.println("Invalid payment method.");
+        }
+
+        cart.setPaymentStrategy(paymentProcessor.getPaymentStrategy());
+        cart.check();
+        process();
 
         sc.close();
     }
